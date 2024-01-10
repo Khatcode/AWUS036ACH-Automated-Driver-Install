@@ -10,6 +10,8 @@ Prerequisites
 Usage
 
     Download the script or copy its content into a file.
+    git clone https://github.com/Khatcode/AWUS036ACH-Automated-Driver-Install
+    cd AWUS036ACH-Automated-Driver-Install
     Make the script executable: chmod +x Alfasetup.sh
     Run the script as root: sudo ./Alfasetup.sh
 
