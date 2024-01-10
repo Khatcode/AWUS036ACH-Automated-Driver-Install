@@ -10,8 +10,8 @@ Prerequisites
 Usage
 
     Download the script or copy its content into a file.
-    Make the script executable: chmod +x script_name.sh
-    Run the script as root: sudo ./script_name.sh
+    Make the script executable: chmod +x Alfasetup.sh
+    Run the script as root: sudo ./Alfasetup.sh
 
 Script Steps
 
