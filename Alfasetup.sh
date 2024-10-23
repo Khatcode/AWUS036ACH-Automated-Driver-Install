@@ -31,7 +31,6 @@ fi
 echo "Running as root on a $PACKAGE_MANAGER-based system. Continue with the rest of the script."
 
 echo "Installing Updates and Upgrades. Give it some time."
-
 sudo "$PACKAGE_MANAGER" update -y && \
 sudo "$PACKAGE_MANAGER" upgrade -y && \
 sudo "$PACKAGE_MANAGER" dist-upgrade -y
@@ -57,7 +56,7 @@ if lsmod | grep -q "88XXau"; then
     echo "Driver already installed."
     
     # Ask the user if they want to remove the existing driver
-    read -p "Do you want to remove the existing installation? (y/n): " REMOVE_CHOICE
+    read -p "We recommend removing the existing installation before installing a new version. Do you want to remove the existing installation? (y/n): " REMOVE_CHOICE
     
     if [[ "$REMOVE_CHOICE" == "y" || "$REMOVE_CHOICE" == "Y" ]]; then
         echo "Removing existing driver installation."
@@ -71,17 +70,10 @@ if lsmod | grep -q "88XXau"; then
         
         # Check if DKMS is managing the module and remove it
         if command -v dkms &> /dev/null; then
-            # Specify the module name and version
-            MODULE_NAME="rtl8812au"  # Adjust if needed based on the actual DKMS module name
-            MODULE_VERSION="$(dkms status | grep "$MODULE_NAME" | awk '{print $2}')"  # Get the version
-
-            if [[ -n "$MODULE_VERSION" ]]; then
-                sudo dkms remove "$MODULE_NAME/$MODULE_VERSION" --all
-                if [[ $? -ne 0 ]]; then
-                    echo "Failed to remove the driver using DKMS. Continuing with manual removal..."
-                fi
-            else
-                echo "Module version not found. Skipping DKMS removal."
+            # Replace <module-name> with the actual name of your module
+            sudo dkms remove rtl8812au/<module-version> --all
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to remove the driver using DKMS. Continuing with manual removal..."
             fi
         fi
         
@@ -105,27 +97,23 @@ if lsmod | grep -q "88XXau"; then
 fi
 
 echo "Installing realtek drivers."
-
 sudo "$PACKAGE_MANAGER" install realtek-rtl88xxau-dkms -y
 
 echo "Installing more drivers"
 git clone https://github.com/aircrack-ng/rtl8812au
 
 echo "Building all necessary rtl8812 executable files into binary applications. This will take some time"
-
 cd rtl8812au
-
 make
 
 echo "Taking newly created binaries and copying them into the appropriate locations on the file system."
-
 sudo make install
 
 echo "The system needs to be rebooted to apply changes."
-
 for i in {5..1}; do
     echo "Rebooting in $i seconds. Press Ctrl+C to cancel."
     sleep 1
 done
 
+# Reboot the system
 sudo init 6
