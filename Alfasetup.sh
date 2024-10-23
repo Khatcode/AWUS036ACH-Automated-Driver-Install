@@ -30,7 +30,7 @@ fi
 
 echo "Running as root on a $PACKAGE_MANAGER-based system. Continue with the rest of the script."
 
-echo "Installing updates and upgrades. This may take some time."
+echo "Installing Updates and Upgrades. Give it some time."
 
 sudo "$PACKAGE_MANAGER" update -y && \
 sudo "$PACKAGE_MANAGER" upgrade -y && \
@@ -53,7 +53,6 @@ elif [ "$PACKAGE_MANAGER" == "dnf" ]; then
     fi
 fi
 
-# Check if the driver is already installed
 if lsmod | grep -q "88XXau"; then
     echo "Driver already installed."
     
@@ -72,9 +71,17 @@ if lsmod | grep -q "88XXau"; then
         
         # Check if DKMS is managing the module and remove it
         if command -v dkms &> /dev/null; then
-            sudo dkms remove rtl8812au --all
-            if [[ $? -ne 0 ]]; then
-                echo "Failed to remove the driver using DKMS. Continuing with manual removal..."
+            # Specify the module name and version
+            MODULE_NAME="rtl8812au"  # Adjust if needed based on the actual DKMS module name
+            MODULE_VERSION="$(dkms status | grep "$MODULE_NAME" | awk '{print $2}')"  # Get the version
+
+            if [[ -n "$MODULE_VERSION" ]]; then
+                sudo dkms remove "$MODULE_NAME/$MODULE_VERSION" --all
+                if [[ $? -ne 0 ]]; then
+                    echo "Failed to remove the driver using DKMS. Continuing with manual removal..."
+                fi
+            else
+                echo "Module version not found. Skipping DKMS removal."
             fi
         fi
         
@@ -97,49 +104,28 @@ if lsmod | grep -q "88XXau"; then
     fi
 fi
 
-# Provide an installation choice
-echo "Choose how you'd like to install the driver:"
-echo "1) Install via DKMS (automatic kernel module handling)"
-echo "2) Install manually from source (manual kernel module handling)"
-read -p "Enter your choice (1 or 2): " INSTALL_CHOICE
+echo "Installing realtek drivers."
 
-if [[ "$INSTALL_CHOICE" == "1" ]]; then
-    # DKMS installation
-    sudo "$PACKAGE_MANAGER" install realtek-rtl88xxau-dkms -y
-    if [[ $? -ne 0 ]]; then
-        echo "Failed to install realtek-rtl88xxau-dkms via package manager. Exiting."
-        exit 1
-    fi
-    echo "Driver installed using DKMS."
+sudo "$PACKAGE_MANAGER" install realtek-rtl88xxau-dkms -y
 
-elif [[ "$INSTALL_CHOICE" == "2" ]]; then
-    # Manual installation
-    echo "Installing drivers from source."
-    git clone https://github.com/aircrack-ng/rtl8812au
-    cd rtl8812au
-    make
-    if [[ $? -ne 0 ]]; then
-        echo "Failed to build the driver. Exiting."
-        exit 1
-    fi
-    sudo make install
-    if [[ $? -ne 0 ]]; then
-        echo "Failed to install the driver. Exiting."
-        exit 1
-    fi
-    make clean  # Clean up after installation
-    echo "Driver installed manually from source."
+echo "Installing more drivers"
+git clone https://github.com/aircrack-ng/rtl8812au
 
-else
-    echo "Invalid choice. Exiting."
-    exit 1
-fi
+echo "Building all necessary rtl8812 executable files into binary applications. This will take some time"
 
-# Reboot the system to apply changes
+cd rtl8812au
+
+make
+
+echo "Taking newly created binaries and copying them into the appropriate locations on the file system."
+
+sudo make install
+
 echo "The system needs to be rebooted to apply changes."
+
 for i in {5..1}; do
     echo "Rebooting in $i seconds. Press Ctrl+C to cancel."
     sleep 1
 done
 
-sudo reboot
+sudo init 6
