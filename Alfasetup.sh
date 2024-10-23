@@ -22,6 +22,10 @@ fi
 if ! command -v git &> /dev/null; then
     echo "Git is not installed. Installing git..."
     sudo "$PACKAGE_MANAGER" install git -y
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to install git. Exiting."
+        exit 1
+    fi
 fi
 
 
@@ -37,9 +41,22 @@ sudo "$PACKAGE_MANAGER" dist-upgrade -y
 if [ "$PACKAGE_MANAGER" == "apt-get" ]; then
     echo "Installing kernel headers for Debian-based systems."
     sudo apt-get install linux-headers-$(uname -r) -y
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to install kernel headers. Exiting."
+        exit 1
+    fi
 elif [ "$PACKAGE_MANAGER" == "dnf" ]; then
     echo "Installing kernel headers for Fedora-based systems."
     sudo dnf install kernel-headers kernel-devel -y
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to install kernel headers. Exiting."
+        exit 1
+    fi
+fi
+
+if lsmod | grep -q "88XXau"; then
+    echo "Driver already installed. Exiting."
+    exit 0
 fi
 
 echo "Installing realtek drivers."
