@@ -63,5 +63,5 @@ echo "The system needs to be rebooted to apply changes."
 
 for i in {5..1}; do
     echo "Rebooting in $i seconds. Press Ctrl+C to cancel."
-    sleep 1
+    sudo init 6
 done
