@@ -127,6 +127,7 @@ elif [[ "$INSTALL_CHOICE" == "2" ]]; then
         echo "Failed to install the driver. Exiting."
         exit 1
     fi
+    make clean  # Clean up after installation
     echo "Driver installed manually from source."
 
 else
