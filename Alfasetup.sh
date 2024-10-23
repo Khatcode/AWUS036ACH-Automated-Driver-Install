@@ -30,6 +30,8 @@ fi
 
 echo "Running as root on a $PACKAGE_MANAGER-based system. Continue with the rest of the script."
 
+export DEBIAN_FRONTEND=noninteractive
+
 echo "Installing Updates and Upgrades. Give it some time."
 sudo "$PACKAGE_MANAGER" update -y && \
 sudo "$PACKAGE_MANAGER" upgrade -y && \
