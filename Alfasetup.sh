@@ -33,6 +33,15 @@ sudo "$PACKAGE_MANAGER" update -y && \
 sudo "$PACKAGE_MANAGER" upgrade -y && \
 sudo "$PACKAGE_MANAGER" dist-upgrade -y
 
+# Install the kernel headers
+if [ "$PACKAGE_MANAGER" == "apt-get" ]; then
+    echo "Installing kernel headers for Debian-based systems."
+    sudo apt-get install linux-headers-$(uname -r) -y
+elif [ "$PACKAGE_MANAGER" == "dnf" ]; then
+    echo "Installing kernel headers for Fedora-based systems."
+    sudo dnf install kernel-headers kernel-devel -y
+fi
+
 echo "Installing realtek drivers."
 
 sudo "$PACKAGE_MANAGER" install realtek-rtl88xxau-dkms -y
