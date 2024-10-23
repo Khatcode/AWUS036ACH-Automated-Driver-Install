@@ -40,7 +40,10 @@ sudo "$PACKAGE_MANAGER" dist-upgrade -y
 # Install the kernel headers
 if [ "$PACKAGE_MANAGER" == "apt-get" ]; then
     echo "Installing kernel headers for Debian-based systems."
-    sudo apt-get install linux-headers-$(uname -r) -y
+    if ! sudo apt-get install linux-headers-$(uname -r) -y; then
+        echo "Specific kernel headers not found. Attempting to install generic headers."
+        sudo apt-get install linux-headers-generic -y
+    fi
     if [[ $? -ne 0 ]]; then
         echo "Failed to install kernel headers. Exiting."
         exit 1
