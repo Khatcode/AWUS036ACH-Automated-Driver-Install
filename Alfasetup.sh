@@ -55,8 +55,46 @@ elif [ "$PACKAGE_MANAGER" == "dnf" ]; then
 fi
 
 if lsmod | grep -q "88XXau"; then
-    echo "Driver already installed. Exiting."
-    exit 0
+    echo "Driver already installed."
+    
+    # Ask the user if they want to remove the existing driver
+    read -p "Do you want to remove the existing installation? (y/n): " REMOVE_CHOICE
+    
+    if [[ "$REMOVE_CHOICE" == "y" || "$REMOVE_CHOICE" == "Y" ]]; then
+        echo "Removing existing driver installation."
+        
+        # Unload the kernel module
+        sudo rmmod 88XXau
+        if [[ $? -ne 0 ]]; then
+            echo "Failed to remove the driver from the kernel. Exiting."
+            exit 1
+        fi
+        
+        # Check if DKMS is managing the module and remove it
+        if command -v dkms &> /dev/null; then
+            sudo dkms remove rtl8812au --all
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to remove the driver using DKMS. Continuing to manual removal..."
+            fi
+        fi
+        
+        # Manually remove the driver files from /lib/modules
+        DRIVER_PATH="/lib/modules/$(uname -r)/kernel/drivers/net/wireless/88XXau.ko"
+        if [[ -f "$DRIVER_PATH" ]]; then
+            sudo rm -f "$DRIVER_PATH"
+            echo "Driver files removed from $DRIVER_PATH."
+        else
+            echo "Driver files not found in $DRIVER_PATH. They might have already been removed."
+        fi
+        
+        # Update module dependencies
+        sudo depmod -a
+        
+        echo "Driver uninstalled successfully."
+    else
+        echo "Skipping driver removal."
+        exit 0
+    fi
 fi
 
 echo "Installing realtek drivers."
