@@ -1,5 +1,8 @@
 # AWUS036ACH Automated Driver Install Script
 
+**⚠️ This repository is not compatible with Hyper-V!**  
+Please avoid using Hyper-V — use VirtualBox, VMware, or native hardware instead.
+
 ## Overview
 
 This bash script automates the installation of Realtek wireless drivers for the **AWUS036ACH** on Linux systems. It performs the following tasks:
