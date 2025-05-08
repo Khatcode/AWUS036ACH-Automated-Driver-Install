@@ -1,5 +1,9 @@
 # AWUS036ACH Automated Driver Install Script
 
+![Hyper-V Not Supported](https://img.shields.io/badge/Hyper--V-not%20supported-red)
+
+---
+
 **⚠️ This repository is not compatible with Hyper-V!**  
 Please avoid using Hyper-V — use VirtualBox, VMware, or native hardware instead.
 
